@@ -1,4 +1,5 @@
 import {
+    AbstractUserInterface,
     cancelable,
     Cancelable,
     Checksum256,
@@ -11,9 +12,14 @@ import {
     UserInterfaceLoginResponse,
 } from '@wharfkit/session'
 
-export class MockUserInterface implements UserInterface {
+export class MockUserInterface extends AbstractUserInterface implements UserInterface {
     readonly logging = false
-    messages: string[] = []
+    public messages: string[] = []
+
+    translate(key) {
+        return key
+    }
+
     log(message: string) {
         this.messages.push(message)
         if (this.logging) {
@@ -21,6 +27,7 @@ export class MockUserInterface implements UserInterface {
             console.info('MockUserInterface', message)
         }
     }
+
     async login(context: LoginContext): Promise<UserInterfaceLoginResponse> {
         let chainId = context.chain?.id
         if (!chainId) {
@@ -36,23 +43,43 @@ export class MockUserInterface implements UserInterface {
             walletPluginIndex: 0,
         }
     }
+
     async onError(error: Error) {
         this.log('onError: ' + JSON.stringify(error))
     }
+
     async onLogin(options?: LoginOptions) {
         this.log('onLogin: ' + JSON.stringify(options))
     }
-    async onLoginResult() {
-        this.log('onLoginResult')
+
+    async onLoginComplete() {
+        this.log('onLoginComplete')
     }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     async onTransact() {
-        this.log('onTransactResult')
+        this.log('onTransact')
     }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async onTransactResult() {
-        this.log('onTransactResult')
+
+    async onTransactComplete() {
+        this.log('onTransactComplete')
     }
+
+    async onSign() {
+        this.log('onSign')
+    }
+
+    async onSignComplete() {
+        this.log('onSignComplete')
+    }
+
+    async onBroadcast() {
+        this.log('onBroadcast')
+    }
+
+    async onBroadcastComplete() {
+        this.log('onBroadcastComplete')
+    }
+
     prompt(args: PromptArgs): Cancelable<PromptResponse> {
         this.log('prompt' + JSON.stringify(args))
         return cancelable(new Promise(() => {}), (canceled) => {
@@ -60,7 +87,12 @@ export class MockUserInterface implements UserInterface {
             throw canceled
         })
     }
+
     status(message: string) {
         this.log(`status:('${message}')`)
+    }
+
+    addTranslations(): void {
+        this.log('addTranslations')
     }
 }
