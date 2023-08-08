@@ -1,13 +1,41 @@
-# @wharfkit/wallet-plugin-template
+# @wharfkit/wallet-plugin-scatter
 
-A template to create a `WalletPlugin` for use within the `@wharfkit/session` library.
+A Session Kit wallet plugin for the Scatter protocol wallets, like TokenPocket(https://www.tokenpocket.pro/).
 
 ## Usage
 
--   [Use this as a template.](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template)
--   Write your wallet plugin's logic.
--   Publish it on Github or npmjs.com
--   Include it in your project and use it.
+Include this wallet plugin while initializing the SessionKit.
+
+**NOTE**: This wallet plugin will only work with the SessionKit and requires a browser-based environment.
+
+```ts
+import {WalletPluginScatter} from '@wharfkit/wallet-plugin-scatter'
+
+const kit = new SessionKit({
+    // ... your other options
+    walletPlugins: [new WalletPluginScatter()],
+})
+```
+
+If you need to modify which chains are supported, modify the URLs being used, or alter the timeout, you can specify one or more of these paramaters during plugin initialization.
+
+```ts
+import {WalletPluginScatter} from '@wharfkit/wallet-plugin-scatter'
+
+const kit = new SessionKit({
+    // ... your other options
+    walletPlugins: [
+        new WalletPluginScatter({
+            supportedChains: [
+                '1064487b3cd1a897ce03ae5b6a865651747e2e152090f99c1d19d44e01aea5a4', // WAX (Mainnet)
+            ],
+            url: 'https://tokenpocket.pro',
+            autoUrl: 'https://idm-api.mycloudwallet.com/v1/accounts/auto-accept',
+            loginTimeout: 300000, // 5 minutes
+        }),
+    ],
+})
+```
 
 ## Developing
 
