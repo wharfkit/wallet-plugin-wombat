@@ -21,8 +21,7 @@
         "tslib": "^2.1.0"
     },
     "peerDependencies": {
-        "@wharfkit/session": "^1.0.0",
-        "device-uuid": "^1.0.4"
+        "@wharfkit/session": "^1.0.0"
     },
     "devDependencies": {
         "@babel/runtime": "^7.22.6",

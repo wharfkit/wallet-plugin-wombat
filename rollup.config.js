@@ -1,6 +1,9 @@
 import fs from 'fs'
 import dts from 'rollup-plugin-dts'
 import typescript from '@rollup/plugin-typescript'
+import commonjs from '@rollup/plugin-commonjs'
+import nodePolyfills from 'rollup-plugin-polyfill-node'
+import replace from '@rollup/plugin-replace'
 
 import pkg from './package.json'
 
@@ -16,7 +19,7 @@ const banner = `
  */
 `.trim()
 
-const external = Object.keys(pkg.peerDependencies)
+const external = [...Object.keys(pkg.peerDependencies), 'isomorphic-ws']
 
 /** @type {import('rollup').RollupOptions} */
 export default [
@@ -29,7 +32,13 @@ export default [
             sourcemap: true,
             exports: 'named',
         },
-        plugins: [typescript({target: 'es6'})],
+        plugins: [
+            typescript({target: 'es6'}),
+            commonjs({
+                defaultIsModuleExports: false,
+            }),
+            nodePolyfills(),
+        ],
         external,
     },
     {
@@ -40,7 +49,16 @@ export default [
             format: 'esm',
             sourcemap: true,
         },
-        plugins: [typescript({target: 'es2020'})],
+        plugins: [
+            typescript({target: 'es2020'}),
+            commonjs({
+                defaultIsModuleExports: false,
+            }),
+            nodePolyfills(),
+            replace({
+                '_require.DeviceUUID': 'window.DeviceUUID',
+            }),
+        ],
         external,
     },
     {
