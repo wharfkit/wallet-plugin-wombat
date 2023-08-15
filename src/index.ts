@@ -1,12 +1,13 @@
 import {
     AbstractWalletPlugin,
     Checksum256,
-    ChainDefinition,
     LoginContext,
     PermissionLevel,
     ResolvedSigningRequest,
-    Signature,
+    Serializer,
+    SigningRequest,
     TransactContext,
+    Transaction,
     WalletPlugin,
     WalletPluginConfig,
     WalletPluginLoginResponse,
@@ -14,10 +15,11 @@ import {
     WalletPluginSignResponse,
 } from '@wharfkit/session'
 
+import {Api, JsonRpc} from 'eosjs'
 import ScatterJS from '@scatterjs/core'
 import ScatterEOS from '@scatterjs/eosjs2'
 
-import { ScatterIdentity, ScatterAccount } from './types'
+import {ScatterAccount} from './types'
 
 ScatterJS.plugins(new ScatterEOS())
 
@@ -31,11 +33,12 @@ export class WalletPluginScatter extends AbstractWalletPlugin implements WalletP
      */
     readonly config: WalletPluginConfig = {
         // Should the user interface display a chain selector?
-        requiresChainSelect: false,
+        requiresChainSelect: true,
 
         // Should the user interface display a permission selector?
         requiresPermissionSelect: false,
     }
+
     /**
      * The metadata for the wallet plugin to be displayed in the user interface.
      */
@@ -70,43 +73,48 @@ export class WalletPluginScatter extends AbstractWalletPlugin implements WalletP
         }
 
         // Retrieve translation helper from the UI, passing the app ID
-        const t = context.ui.getTranslate(this.id)
+        // const t = context.ui.getTranslate(this.id)
 
-        let chains: ChainDefinition[] = []
-        if (context.chain) {
-            chains = [context.chain]
-        } else {
-            chains = context.chains
+        const {account} = await this.getScatter(context)
+
+        return {
+            chain: Checksum256.from(account.chainId),
+            permissionLevel: PermissionLevel.from(`${account.name}@${account.authority}`),
         }
-        const networks: ScatterJS.Network[] = []
-        chains.forEach((chain) => {
-            const url = new URL(chain.url)
-            networks.push(
-                ScatterJS.Network.fromJson({
-                    blockchain: chain.name,
-                    chainId: chain.id,
-                    host: url.hostname,
-                    port: url.port,
-                    protocol: url.protocol,
-                })
-            )
-        })
+    }
 
-        const connected: boolean = await ScatterJS.connect(context.appName);
+    async getScatter(context): Promise<{account: ScatterAccount; connector: any}> {
+        // Ensure connected
+        const connected: boolean = await ScatterJS.connect(context.appName)
         if (!connected) {
             throw new Error('No Scatter Wallet')
         }
 
-        const scatterIdentity: ScatterIdentity = await ScatterJS.login({ accounts: networks })
+        // Setup network
+        const url = new URL(context.chain.url)
+        const network = ScatterJS.Network.fromJson({
+            blockchain: 'default',
+            chainId: String(context.chain.id),
+            host: url.hostname,
+            port: url.port,
+            protocol: url.protocol.replace(':', ''),
+        })
+
+        // Ensure connection and get identity
+        const scatterIdentity = await ScatterJS.login({accounts: [network]})
         if (!scatterIdentity || !scatterIdentity.accounts) {
             throw new Error('Failed to login in scatter')
         }
-        const account: ScatterAccount = scatterIdentity.accounts[0];
+        const account: ScatterAccount = scatterIdentity.accounts[0]
+
+        // Establish connector
+        const rpc = new JsonRpc(network.fullhost())
+        rpc.getRequiredKeys = async () => [] // Hacky way to get around getRequiredKeys
+        const connector = ScatterJS.eos(network, Api, {rpc})
+
         return {
-            chain: Checksum256.from(
-                account.chainId
-            ),
-            permissionLevel: PermissionLevel.from(`${account.name}@${account.authority}`),
+            account,
+            connector,
         }
     }
 
@@ -121,7 +129,6 @@ export class WalletPluginScatter extends AbstractWalletPlugin implements WalletP
         resolved: ResolvedSigningRequest,
         context: TransactContext
     ): Promise<WalletPluginSignResponse> {
-
         return this.handleSignatureRequest(resolved, context)
     }
 
@@ -134,33 +141,39 @@ export class WalletPluginScatter extends AbstractWalletPlugin implements WalletP
         }
 
         // Retrieve translation helper from the UI, passing the app ID
-        const t = context.ui.getTranslate(this.id)
+        // const t = context.ui.getTranslate(this.id)
 
-        const scatterAccount: ScatterAccount = ScatterJS.identity.accounts[0];
-        if (!scatterAccount) {
-            throw new Error('Need to login first')
-        }
-        const permissionLevel = resolved.signer;
-        if (permissionLevel.actor.toString() !== scatterAccount.name ||
-            permissionLevel.permission.toString() !== scatterAccount.authority) {
-            throw new Error('Need to login first')
-        }
+        // Get the connector from Scatter
+        const {connector} = await this.getScatter(context)
 
-        const abis = await resolved.request.fetchAbis(context.abiCache)
-        console.log(JSON.stringify(abis))
-        const transaction = {
-            abis,
-            chainId: resolved.chainId.toString(),
-            requiredKeys: [scatterAccount.publicKey],
-            serializedTransaction: Buffer.from(resolved.serializedTransaction).toString('hex'),
-        }
+        // Convert the transaction to plain JS
+        const plainTransaction = JSON.parse(JSON.stringify(resolved.resolvedTransaction))
 
-        const signatures = await ScatterJS.requestSignature(transaction);
+        // Call transact on the connector
+        const response = await connector.transact(plainTransaction, {
+            broadcast: false,
+        })
 
-        // Return the new request and the signatures from the wallet
+        // Get the response back (since the wallet may have modified the transaction)
+        const modified = Serializer.decode({
+            data: response.serializedTransaction,
+            type: Transaction,
+        })
+
+        // Create the new request and resolve it
+        const modifiedRequest = await SigningRequest.create(
+            {
+                transaction: modified,
+            },
+            context.esrOptions
+        )
+        const abis = await modifiedRequest.fetchAbis(context.abiCache)
+        const modifiedResolved = modifiedRequest.resolve(abis, context.permissionLevel)
+
+        // Return the modified request and the signatures from the wallet
         return {
-            signatures: signatures.signatures,
-            resolved,
+            signatures: response.signatures,
+            resolved: modifiedResolved,
         }
     }
 }
