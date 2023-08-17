@@ -1,5 +1,6 @@
 import {
     AbstractWalletPlugin,
+    Canceled,
     Chains,
     Checksum256,
     LoginContext,
@@ -163,6 +164,9 @@ export class WalletPluginScatter extends AbstractWalletPlugin implements WalletP
         const response = await connector.transact(plainTransaction, {
             broadcast: false,
         })
+        if (!response.serializedTransaction) {
+            throw new Canceled('User Canceled request')
+        }
 
         // Get the response back (since the wallet may have modified the transaction)
         const modified = Serializer.decode({
