@@ -1,17 +1,17 @@
-import {assert} from 'chai'
-import {PermissionLevel, SessionKit} from '@wharfkit/session'
+import { assert } from 'chai'
+import { PermissionLevel, SessionKit } from '@wharfkit/session'
 
-import {WalletPluginTEMPLATE} from '$lib'
-import {mockFetch} from '$test/utils/mock-fetch'
-import {MockStorage} from '$test/utils/mock-storage'
-import {MockUserInterface} from '$test/utils/mock-ui'
+import { WalletPluginScatter } from '$lib'
+import { mockFetch } from '$test/utils/mock-fetch'
+import { MockStorage } from '$test/utils/mock-storage'
+import { MockUserInterface } from '$test/utils/mock-ui'
 
 const mockChainDefinition = {
-    id: '73e4385a2708e6d7048834fbc1079f2fabb17b3c125b146af438971e90716c4d',
-    url: 'https://jungle4.greymass.com',
+    id: 'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906',
+    url: 'https://eos.greymass.com',
 }
 
-const mockPermissionLevel = PermissionLevel.from('wharfkit1115@test')
+const mockPermissionLevel = PermissionLevel.from('wharfkit1111@test')
 
 const mockSessionKitOptions = {
     appName: 'unittests',
@@ -19,13 +19,17 @@ const mockSessionKitOptions = {
     fetch: mockFetch, // Required for unit tests
     storage: new MockStorage(),
     ui: new MockUserInterface(),
-    walletPlugins: [new WalletPluginTEMPLATE()],
+    walletPlugins: [new WalletPluginScatter()],
 }
 
 suite('wallet plugin', function () {
+    this.timeout(120 * 1000)
+    this.slow(5 * 1000)
+
     test('login and sign', async function () {
+
         const kit = new SessionKit(mockSessionKitOptions)
-        const {session} = await kit.login({
+        const { session } = await kit.login({
             chain: mockChainDefinition.id,
             permissionLevel: mockPermissionLevel,
         })

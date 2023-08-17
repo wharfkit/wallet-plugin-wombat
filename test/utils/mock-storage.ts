@@ -1,4 +1,4 @@
-import {SessionStorage} from '@wharfkit/session'
+import { SessionStorage } from '@wharfkit/session'
 
 export class MockStorage implements SessionStorage {
     data: Record<string, string> = {}
