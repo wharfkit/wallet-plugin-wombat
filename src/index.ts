@@ -1,5 +1,6 @@
 import {
     AbstractWalletPlugin,
+    Chains,
     Checksum256,
     LoginContext,
     PermissionLevel,
@@ -15,11 +16,12 @@ import {
     WalletPluginSignResponse,
 } from '@wharfkit/session'
 
-import {Api, JsonRpc} from 'eosjs'
+import { Api, JsonRpc } from 'eosjs'
 import ScatterJS from '@scatterjs/core'
 import ScatterEOS from '@scatterjs/eosjs2'
 
-import {ScatterAccount} from './types'
+import { ScatterAccount } from './types'
+
 
 ScatterJS.plugins(new ScatterEOS())
 
@@ -75,15 +77,23 @@ export class WalletPluginScatter extends AbstractWalletPlugin implements WalletP
         // Retrieve translation helper from the UI, passing the app ID
         // const t = context.ui.getTranslate(this.id)
 
-        const {account} = await this.getScatter(context)
+        const { account } = await this.getScatter(context)
+        let chainId: string;
+        if (account.chainId) {
+            chainId = account.chainId
+        } else if (account.blockchain && Object.keys(Chains).includes(account.blockchain.toUpperCase())) {
+            chainId = Chains[account.blockchain.toUpperCase()].id
+        } else {
+            throw new Error('Unknown chain')
+        }
 
         return {
-            chain: Checksum256.from(account.chainId),
+            chain: Checksum256.from(chainId),
             permissionLevel: PermissionLevel.from(`${account.name}@${account.authority}`),
         }
     }
 
-    async getScatter(context): Promise<{account: ScatterAccount; connector: any}> {
+    async getScatter(context): Promise<{ account: ScatterAccount; connector: any }> {
         // Ensure connected
         const connected: boolean = await ScatterJS.connect(context.appName)
         if (!connected) {
@@ -101,7 +111,7 @@ export class WalletPluginScatter extends AbstractWalletPlugin implements WalletP
         })
 
         // Ensure connection and get identity
-        const scatterIdentity = await ScatterJS.login({accounts: [network]})
+        const scatterIdentity = await ScatterJS.login({ accounts: [network] })
         if (!scatterIdentity || !scatterIdentity.accounts) {
             throw new Error('Failed to login in scatter')
         }
@@ -110,7 +120,7 @@ export class WalletPluginScatter extends AbstractWalletPlugin implements WalletP
         // Establish connector
         const rpc = new JsonRpc(network.fullhost())
         rpc.getRequiredKeys = async () => [] // Hacky way to get around getRequiredKeys
-        const connector = ScatterJS.eos(network, Api, {rpc})
+        const connector = ScatterJS.eos(network, Api, { rpc })
 
         return {
             account,
@@ -144,7 +154,7 @@ export class WalletPluginScatter extends AbstractWalletPlugin implements WalletP
         // const t = context.ui.getTranslate(this.id)
 
         // Get the connector from Scatter
-        const {connector} = await this.getScatter(context)
+        const { connector } = await this.getScatter(context)
 
         // Convert the transaction to plain JS
         const plainTransaction = JSON.parse(JSON.stringify(resolved.resolvedTransaction))
