@@ -1,4 +1,4 @@
-import {Bytes, Name, PublicKey, Struct, TimePointSec, UInt32, UInt64} from '@wharfkit/antelope'
+import {Struct} from '@wharfkit/antelope'
 
 @Struct.type('scatter_account')
 export class ScatterAccount extends Struct {
