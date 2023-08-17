@@ -67,7 +67,6 @@ export class WalletPluginWombat extends AbstractWalletPlugin implements WalletPl
                     resolve(response)
                 })
                 .catch((error) => {
-                    console.log(error)
                     reject(error)
                 })
         })
