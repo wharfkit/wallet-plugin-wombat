@@ -1,7 +1,7 @@
 {
     "name": "@wharfkit/wallet-plugin-wombat",
     "description": "A WalletPlugin for the Wombat wallet for use within the @wharfkit/session.",
-    "version": "1.0.1-beta1",
+    "version": "1.0.1",
     "homepage": "https://github.com/wharfkit/wallet-plugin-wombat",
     "license": "BSD-3-Clause",
     "main": "lib/wallet-plugin-wombat.js",
