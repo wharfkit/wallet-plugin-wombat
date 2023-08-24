@@ -162,13 +162,25 @@ export class WalletPluginWombat extends AbstractWalletPlugin implements WalletPl
         // Get the connector from Scatter
         const {connector} = await this.getScatter(context)
 
-        // Convert the transaction to plain JS
-        const plainTransaction = JSON.parse(JSON.stringify(resolved.resolvedTransaction))
+        // Inject all the ABIs cached already into eosjs
+        context.abiCache.cache.forEach((abi, account) => {
+            connector.cachedAbis.set(account, {
+                rawAbi: Serializer.encode({object: abi}).array,
+                abi: Serializer.objectify(abi),
+            })
+        })
+
+        // Encode the resolved transaction
+        const encoded = Serializer.encode({object: resolved.transaction})
+
+        // So eosjs can decode it in its own format
+        const decoded = await connector.deserializeTransactionWithActions(encoded.array)
 
         // Call transact on the connector
-        const response = await connector.transact(plainTransaction, {
+        const response = await connector.transact(decoded, {
             broadcast: false,
         })
+
         if (!response.serializedTransaction) {
             throw new Canceled('User Canceled request')
         }
