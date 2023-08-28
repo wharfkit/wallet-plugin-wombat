@@ -38,6 +38,10 @@ export default [
                 defaultIsModuleExports: false,
             }),
             nodePolyfills(),
+            replace({
+                '})(commonjsGlobal);': '})(deviceUuid);',
+                delimiters: ['', ''],
+            }),
         ],
         external,
     },
@@ -56,7 +60,8 @@ export default [
             }),
             nodePolyfills(),
             replace({
-                '_require.DeviceUUID': 'window.DeviceUUID',
+                '})(commonjsGlobal)': '})(deviceUuid)',
+                delimiters: ['', ''],
             }),
         ],
         external,
