@@ -4,6 +4,8 @@ import typescript from '@rollup/plugin-typescript'
 import commonjs from '@rollup/plugin-commonjs'
 import nodePolyfills from 'rollup-plugin-polyfill-node'
 import replace from '@rollup/plugin-replace'
+import resolve from '@rollup/plugin-node-resolve'
+import json from '@rollup/plugin-json'
 
 import pkg from './package.json'
 
@@ -19,7 +21,7 @@ const banner = `
  */
 `.trim()
 
-const external = [...Object.keys(pkg.peerDependencies), 'isomorphic-ws']
+const external = [...Object.keys(pkg.peerDependencies)]
 
 /** @type {import('rollup').RollupOptions} */
 export default [
@@ -39,9 +41,12 @@ export default [
             }),
             nodePolyfills(),
             replace({
+                preventAssignment: true,
                 '})(commonjsGlobal);': '})(deviceUuid);',
                 delimiters: ['', ''],
             }),
+            resolve({browser: true}),
+            json(),
         ],
         external,
     },
@@ -60,9 +65,12 @@ export default [
             }),
             nodePolyfills(),
             replace({
+                preventAssignment: true,
                 '})(commonjsGlobal)': '})(deviceUuid)',
                 delimiters: ['', ''],
             }),
+            resolve({browser: true}),
+            json(),
         ],
         external,
     },
