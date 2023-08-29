@@ -44,7 +44,7 @@ export default [
             nodePolyfills(),
             replace({
                 preventAssignment: true,
-                '})(commonjsGlobal);': '})(deviceUuid);',
+                '})(commonjsGlobal);': '})(deviceUuid$1);',
                 delimiters: ['', ''],
             }),
             resolve({browser: true}),
@@ -68,7 +68,7 @@ export default [
             nodePolyfills(),
             replace({
                 preventAssignment: true,
-                '})(commonjsGlobal)': '})(deviceUuid)',
+                '})(commonjsGlobal)': '})(deviceUuid$1)',
                 delimiters: ['', ''],
             }),
             resolve({browser: true}),
