@@ -7,7 +7,9 @@ import replace from '@rollup/plugin-replace'
 import resolve from '@rollup/plugin-node-resolve'
 import json from '@rollup/plugin-json'
 
-import pkg from './package.json'
+import {createRequire} from 'module'
+const require = createRequire(import.meta.url)
+const pkg = require('./package.json')
 
 const name = pkg.name
 const license = fs.readFileSync('LICENSE').toString('utf-8').trim()
