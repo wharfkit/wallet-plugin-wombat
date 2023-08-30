@@ -109,7 +109,7 @@ export class WalletPluginWombat extends AbstractWalletPlugin implements WalletPl
         // Setup network
         const url = new URL(context.chain.url)
         const network = ScatterJS.Network.fromJson({
-            blockchain: 'default',
+            blockchain: context.chain.name,
             chainId: String(context.chain.id),
             host: url.hostname,
             port: url.port,
