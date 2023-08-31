@@ -109,7 +109,7 @@ export class WalletPluginWombat extends AbstractWalletPlugin implements WalletPl
         // Setup network
         const url = new URL(context.chain.url)
         const network = ScatterJS.Network.fromJson({
-            blockchain: 'default',
+            blockchain: context.chain.name,
             chainId: String(context.chain.id),
             host: url.hostname,
             port: url.port,
@@ -161,14 +161,6 @@ export class WalletPluginWombat extends AbstractWalletPlugin implements WalletPl
 
         // Get the connector from Scatter
         const {connector} = await this.getScatter(context)
-
-        // Inject all the ABIs cached already into eosjs
-        context.abiCache.cache.forEach((abi, account) => {
-            connector.cachedAbis.set(account, {
-                rawAbi: Serializer.encode({object: abi}).array,
-                abi: Serializer.objectify(abi),
-            })
-        })
 
         // Encode the resolved transaction
         const encoded = Serializer.encode({object: resolved.transaction})

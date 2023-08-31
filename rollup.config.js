@@ -4,8 +4,12 @@ import typescript from '@rollup/plugin-typescript'
 import commonjs from '@rollup/plugin-commonjs'
 import nodePolyfills from 'rollup-plugin-polyfill-node'
 import replace from '@rollup/plugin-replace'
+import resolve from '@rollup/plugin-node-resolve'
+import json from '@rollup/plugin-json'
 
-import pkg from './package.json'
+import {createRequire} from 'module'
+const require = createRequire(import.meta.url)
+const pkg = require('./package.json')
 
 const name = pkg.name
 const license = fs.readFileSync('LICENSE').toString('utf-8').trim()
@@ -19,7 +23,7 @@ const banner = `
  */
 `.trim()
 
-const external = [...Object.keys(pkg.peerDependencies), 'isomorphic-ws']
+const external = [...Object.keys(pkg.peerDependencies)]
 
 /** @type {import('rollup').RollupOptions} */
 export default [
@@ -38,6 +42,13 @@ export default [
                 defaultIsModuleExports: false,
             }),
             nodePolyfills(),
+            replace({
+                preventAssignment: true,
+                '})(commonjsGlobal);': '})(deviceUuid$1);',
+                delimiters: ['', ''],
+            }),
+            resolve({browser: true}),
+            json(),
         ],
         external,
     },
@@ -56,8 +67,12 @@ export default [
             }),
             nodePolyfills(),
             replace({
-                '_require.DeviceUUID': 'window.DeviceUUID',
+                preventAssignment: true,
+                '})(commonjsGlobal)': '})(deviceUuid$1)',
+                delimiters: ['', ''],
             }),
+            resolve({browser: true}),
+            json(),
         ],
         external,
     },
