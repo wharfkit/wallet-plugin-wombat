@@ -17,19 +17,6 @@ const kit = new SessionKit({
 })
 ```
 
-If you need to modify which chains are supported, modify the URLs being used, or alter the timeout, you can specify one or more of these paramaters during plugin initialization.
-
-```ts
-import {WalletPluginWombat} from '@wharfkit/wallet-plugin-wombat'
-
-const kit = new SessionKit({
-    // ... your other options
-    walletPlugins: [
-        new WalletPluginWombat(),
-    ],
-})
-```
-
 ## Developing
 
 You need [Make](https://www.gnu.org/software/make/), [node.js](https://nodejs.org/en/) and [yarn](https://classic.yarnpkg.com/en/docs/install) installed.
