@@ -18,7 +18,7 @@ import {
 } from '@wharfkit/session'
 
 import {Api, JsonRpc} from 'eosjs'
-import {ScatterJS, ScatterEOS, ScatterAccount, ScatterIdentity} from 'scatter-ts'
+import {ScatterAccount, ScatterEOS, ScatterIdentity, ScatterJS} from 'scatter-ts'
 
 export class WalletPluginWombat extends AbstractWalletPlugin implements WalletPlugin {
     id = 'wombat'
