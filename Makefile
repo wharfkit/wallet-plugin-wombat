@@ -5,7 +5,7 @@ BIN := ./node_modules/.bin
 MOCHA_OPTS := -u tdd -r ts-node/register -r tsconfig-paths/register --extension ts
 NYC_OPTS := --temp-dir build/nyc_output --report-dir build/coverage
 
-lib: ${SRC_FILES} package.json tsconfig.json node_modules rollup.config.js
+lib: ${SRC_FILES} package.json tsconfig.json node_modules rollup.config.mjs
 	@${BIN}/rollup -c && touch lib
 
 .PHONY: test
@@ -62,8 +62,8 @@ build/pages: build/docs test/browser.html
 deploy-pages: | clean build/pages node_modules
 	@${BIN}/gh-pages -d build/pages
 
-test/browser.html: $(SRC_FILES) $(TEST_FILES) test/rollup.config.js node_modules
-	@${BIN}/rollup -c test/rollup.config.js
+test/browser.html: $(SRC_FILES) $(TEST_FILES) test/rollup.config.mjs node_modules
+	@${BIN}/rollup -c test/rollup.config.mjs
 
 .PHONY: browser-test
 browser-test: test/browser.html
