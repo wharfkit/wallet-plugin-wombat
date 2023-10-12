@@ -4,7 +4,6 @@
     "version": "1.0.3",
     "homepage": "https://github.com/wharfkit/wallet-plugin-wombat",
     "license": "BSD-3-Clause",
-    "type": "module",
     "main": "lib/wallet-plugin-wombat.js",
     "module": "lib/wallet-plugin-wombat.m.js",
     "types": "lib/wallet-plugin-wombat.d.ts",
