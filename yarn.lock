@@ -572,6 +572,15 @@
   dependencies:
     tslib "^2.1.0"
 
+"@wharfkit/protocol-scatter@^1.0.0-rc1":
+  version "1.0.0-rc1"
+  resolved "https://registry.yarnpkg.com/@wharfkit/protocol-scatter/-/protocol-scatter-1.0.0-rc1.tgz#a23bb432daaa53503ef7cd410242ffe23d47aadf"
+  integrity sha512-0wkteKBDY8jCW0CgYCqQ+c3PaNlP/EcRnTkOzuvVI64u3IRv4nfxrxaAACsV6ZWfuaexrW3/Z1djgos58VFyTA==
+  dependencies:
+    eosjs "20.0.0"
+    scatter-ts "^0.1.9"
+    tslib "^2.1.0"
+
 "@wharfkit/session@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@wharfkit/session/-/session-1.0.0.tgz#09c60d01a6185ab2e451d34462d84de2d7013220"

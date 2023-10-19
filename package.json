@@ -16,8 +16,7 @@
         "prepare": "make"
     },
     "dependencies": {
-        "eosjs": "20.0.0",
-        "scatter-ts": "^0.1.9",
+        "@wharfkit/protocol-scatter": "^1.0.0-rc1",
         "tslib": "^2.1.0"
     },
     "peerDependencies": {
