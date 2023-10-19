@@ -3,7 +3,6 @@ import dts from 'rollup-plugin-dts'
 import typescript from '@rollup/plugin-typescript'
 import commonjs from '@rollup/plugin-commonjs'
 import nodePolyfills from 'rollup-plugin-polyfill-node'
-import replace from '@rollup/plugin-replace'
 import resolve from '@rollup/plugin-node-resolve'
 import json from '@rollup/plugin-json'
 
@@ -42,11 +41,6 @@ export default [
                 defaultIsModuleExports: false,
             }),
             nodePolyfills(),
-            replace({
-                preventAssignment: true,
-                '})(commonjsGlobal);': '})(deviceUuid$1);',
-                delimiters: ['', ''],
-            }),
             resolve({browser: true}),
             json(),
         ],
@@ -66,11 +60,6 @@ export default [
                 defaultIsModuleExports: false,
             }),
             nodePolyfills(),
-            replace({
-                preventAssignment: true,
-                '})(commonjsGlobal)': '})(deviceUuid$1)',
-                delimiters: ['', ''],
-            }),
             resolve({browser: true}),
             json(),
         ],

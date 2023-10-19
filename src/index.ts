@@ -1,27 +1,16 @@
 import {
     AbstractWalletPlugin,
-    Canceled,
-    Chains,
-    Checksum256,
     LoginContext,
-    PermissionLevel,
     ResolvedSigningRequest,
-    Serializer,
-    SigningRequest,
     TransactContext,
-    Transaction,
     WalletPlugin,
     WalletPluginConfig,
     WalletPluginLoginResponse,
     WalletPluginMetadata,
     WalletPluginSignResponse,
 } from '@wharfkit/session'
-
-import {Api, JsonRpc} from 'eosjs'
-import ScatterJS from '@scatterjs/core'
-import ScatterEOS from '@scatterjs/eosjs2'
-
-import {ScatterAccount} from './types'
+import {handleLogin, handleSignatureRequest} from '@wharfkit/protocol-scatter'
+import {ScatterEOS, ScatterJS} from 'scatter-ts'
 
 export class WalletPluginWombat extends AbstractWalletPlugin implements WalletPlugin {
     id = 'wombat'
@@ -62,7 +51,7 @@ export class WalletPluginWombat extends AbstractWalletPlugin implements WalletPl
      */
     login(context: LoginContext): Promise<WalletPluginLoginResponse> {
         return new Promise((resolve, reject) => {
-            this.handleLogin(context)
+            handleLogin(context)
                 .then((response) => {
                     resolve(response)
                 })
@@ -70,68 +59,6 @@ export class WalletPluginWombat extends AbstractWalletPlugin implements WalletPl
                     reject(error)
                 })
         })
-    }
-
-    async handleLogin(context: LoginContext): Promise<WalletPluginLoginResponse> {
-        if (!context.ui) {
-            throw new Error('No UI available')
-        }
-
-        // Retrieve translation helper from the UI, passing the app ID
-        // const t = context.ui.getTranslate(this.id)
-
-        const {account} = await this.getScatter(context)
-        let chainId: string
-        if (account.chainId) {
-            chainId = account.chainId
-        } else if (
-            account.blockchain &&
-            Object.keys(Chains).includes(account.blockchain.toUpperCase())
-        ) {
-            chainId = Chains[account.blockchain.toUpperCase()].id
-        } else {
-            throw new Error('Unknown chain')
-        }
-
-        return {
-            chain: Checksum256.from(chainId),
-            permissionLevel: PermissionLevel.from(`${account.name}@${account.authority}`),
-        }
-    }
-
-    async getScatter(context): Promise<{account: ScatterAccount; connector: any}> {
-        // Ensure connected
-        const connected: boolean = await ScatterJS.connect(context.appName)
-        if (!connected) {
-            throw new Error('Unable to connect with Wombat wallet')
-        }
-
-        // Setup network
-        const url = new URL(context.chain.url)
-        const network = ScatterJS.Network.fromJson({
-            blockchain: context.chain.name,
-            chainId: String(context.chain.id),
-            host: url.hostname,
-            port: url.port,
-            protocol: url.protocol.replace(':', ''),
-        })
-
-        // Ensure connection and get identity
-        const scatterIdentity = await ScatterJS.login({accounts: [network]})
-        if (!scatterIdentity || !scatterIdentity.accounts) {
-            throw new Error('Unable to retrieve account from Wombat')
-        }
-        const account: ScatterAccount = scatterIdentity.accounts[0]
-
-        // Establish connector
-        const rpc = new JsonRpc(network.fullhost())
-        rpc.getRequiredKeys = async () => [] // Hacky way to get around getRequiredKeys
-        const connector = ScatterJS.eos(network, Api, {rpc})
-
-        return {
-            account,
-            connector,
-        }
     }
 
     /**
@@ -145,58 +72,6 @@ export class WalletPluginWombat extends AbstractWalletPlugin implements WalletPl
         resolved: ResolvedSigningRequest,
         context: TransactContext
     ): Promise<WalletPluginSignResponse> {
-        return this.handleSignatureRequest(resolved, context)
-    }
-
-    private async handleSignatureRequest(
-        resolved: ResolvedSigningRequest,
-        context: TransactContext
-    ): Promise<WalletPluginSignResponse> {
-        if (!context.ui) {
-            throw new Error('No UI available')
-        }
-
-        // Retrieve translation helper from the UI, passing the app ID
-        // const t = context.ui.getTranslate(this.id)
-
-        // Get the connector from Scatter
-        const {connector} = await this.getScatter(context)
-
-        // Encode the resolved transaction
-        const encoded = Serializer.encode({object: resolved.transaction})
-
-        // So eosjs can decode it in its own format
-        const decoded = await connector.deserializeTransactionWithActions(encoded.array)
-
-        // Call transact on the connector
-        const response = await connector.transact(decoded, {
-            broadcast: false,
-        })
-
-        if (!response.serializedTransaction) {
-            throw new Canceled('User Canceled request')
-        }
-
-        // Get the response back (since the wallet may have modified the transaction)
-        const modified = Serializer.decode({
-            data: response.serializedTransaction,
-            type: Transaction,
-        })
-
-        // Create the new request and resolve it
-        const modifiedRequest = await SigningRequest.create(
-            {
-                transaction: modified,
-            },
-            context.esrOptions
-        )
-        const abis = await modifiedRequest.fetchAbis(context.abiCache)
-        const modifiedResolved = modifiedRequest.resolve(abis, context.permissionLevel)
-
-        // Return the modified request and the signatures from the wallet
-        return {
-            signatures: response.signatures,
-            resolved: modifiedResolved,
-        }
+        return handleSignatureRequest(resolved, context)
     }
 }
