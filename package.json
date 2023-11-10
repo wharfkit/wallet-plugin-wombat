@@ -16,11 +16,11 @@
         "prepare": "make"
     },
     "dependencies": {
-        "@wharfkit/protocol-scatter": "^1.0.0-rc1",
+        "@wharfkit/protocol-scatter": "^1.1.0",
         "tslib": "^2.1.0"
     },
     "peerDependencies": {
-        "@wharfkit/session": "^1.0.0"
+        "@wharfkit/session": "^1.1.0"
     },
     "devDependencies": {
         "@babel/runtime": "^7.22.6",
@@ -34,7 +34,7 @@
         "@types/node": "^18.7.18",
         "@typescript-eslint/eslint-plugin": "^5.20.0",
         "@typescript-eslint/parser": "^5.20.0",
-        "@wharfkit/session": "^1.0.0",
+        "@wharfkit/session": "^1.1.0-rcfinal",
         "chai": "^4.3.4",
         "crypto-js": "^4.1.1",
         "eslint": "^8.13.0",
