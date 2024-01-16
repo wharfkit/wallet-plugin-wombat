@@ -12,7 +12,7 @@ import {
 import {handleLogin, handleSignatureRequest} from '@wharfkit/protocol-scatter'
 import {ScatterEOS, ScatterJS} from 'scatter-ts'
 
-export class WalletPluginWombat extends AbstractWalletPlugin implements WalletPlugin {
+export class WalletPluginWombat extends AbstractWalletPlugin {
     id = 'wombat'
 
     translations = {}
