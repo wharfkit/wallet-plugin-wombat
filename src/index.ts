@@ -10,7 +10,6 @@ import {
     WalletPluginSignResponse,
 } from '@wharfkit/session'
 import {handleLogin, handleSignatureRequest} from '@wharfkit/protocol-scatter'
-import {ScatterEOS, ScatterJS} from 'scatter-ts'
 
 export class WalletPluginWombat extends AbstractWalletPlugin {
     id = 'wombat'
@@ -30,7 +29,6 @@ export class WalletPluginWombat extends AbstractWalletPlugin {
 
     constructor() {
         super()
-        ScatterJS.plugins(new ScatterEOS())
     }
 
     /**

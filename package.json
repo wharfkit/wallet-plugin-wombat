@@ -16,7 +16,7 @@
         "prepare": "make"
     },
     "dependencies": {
-        "@wharfkit/protocol-scatter": "^1.1.0",
+        "@wharfkit/protocol-scatter": "^1.2.0",
         "tslib": "^2.1.0"
     },
     "peerDependencies": {
