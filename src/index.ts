@@ -10,7 +10,6 @@ import {
     WalletPluginMetadata,
     WalletPluginSignResponse,
 } from '@wharfkit/session'
-import {handleLogin, handleLogout, handleSignatureRequest} from '@wharfkit/protocol-scatter'
 
 export class WalletPluginWombat extends AbstractWalletPlugin implements WalletPlugin {
     id = 'wombat'
@@ -42,22 +41,26 @@ export class WalletPluginWombat extends AbstractWalletPlugin implements WalletPl
         homepage: 'https://www.wombat.app/',
         download: 'https://www.wombat.app/the-app',
     })
+
+    private async loadScatterProtocol() {
+        if (typeof window !== 'undefined') {
+            return import('@wharfkit/protocol-scatter')
+        }
+        return null
+    }
+
     /**
      * Performs the wallet logic required to login and return the chain and permission level to use.
      *
      * @param context LoginContext
      * @returns Promise<WalletPluginLoginResponse>
      */
-    login(context: LoginContext): Promise<WalletPluginLoginResponse> {
-        return new Promise((resolve, reject) => {
-            handleLogin(context)
-                .then((response) => {
-                    resolve(response)
-                })
-                .catch((error) => {
-                    reject(error)
-                })
-        })
+    async login(context: LoginContext): Promise<WalletPluginLoginResponse> {
+        const scatterProtocol = await this.loadScatterProtocol()
+        if (!scatterProtocol) {
+            throw new Error('Scatter protocol is not available in this environment')
+        }
+        return scatterProtocol.handleLogin(context)
     }
 
     /**
@@ -66,17 +69,12 @@ export class WalletPluginWombat extends AbstractWalletPlugin implements WalletPl
      * @param context: LogoutContext
      * @returns Promise<void>
      */
-
-    logout(context: LogoutContext): Promise<void> {
-        return new Promise((resolve, reject) => {
-            handleLogout(context)
-                .then(() => {
-                    resolve()
-                })
-                .catch((error) => {
-                    reject(error)
-                })
-        })
+    async logout(context: LogoutContext): Promise<void> {
+        const scatterProtocol = await this.loadScatterProtocol()
+        if (!scatterProtocol) {
+            throw new Error('Scatter protocol is not available in this environment')
+        }
+        return scatterProtocol.handleLogout(context)
     }
 
     /**
@@ -86,10 +84,14 @@ export class WalletPluginWombat extends AbstractWalletPlugin implements WalletPl
      * @param resolved ResolvedSigningRequest
      * @returns Promise<Signature>
      */
-    sign(
+    async sign(
         resolved: ResolvedSigningRequest,
         context: TransactContext
     ): Promise<WalletPluginSignResponse> {
-        return handleSignatureRequest(resolved, context)
+        const scatterProtocol = await this.loadScatterProtocol()
+        if (!scatterProtocol) {
+            throw new Error('Scatter protocol is not available in this environment')
+        }
+        return scatterProtocol.handleSignatureRequest(resolved, context)
     }
 }
