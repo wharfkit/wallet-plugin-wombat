@@ -34,7 +34,6 @@ export default [
             format: 'cjs',
             sourcemap: true,
             exports: 'named',
-            inlineDynamicImports: true,
         },
         plugins: [
             typescript({target: 'es6'}),
@@ -68,7 +67,7 @@ export default [
     },
     {
         input: 'src/index.ts',
-        output: {banner, dir: pkg.types, format: 'esm'},
+        output: {banner, dir: pkg.types.split('/').slice(0, -1).join('/'), format: 'esm'},
         plugins: [dts()],
     },
 ]
