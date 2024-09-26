@@ -43,10 +43,15 @@ export class WalletPluginWombat extends AbstractWalletPlugin implements WalletPl
     })
 
     private async loadScatterProtocol() {
+        let scatterProtocol
         if (typeof window !== 'undefined') {
-            return import('@wharfkit/protocol-scatter')
+            scatterProtocol = await import('@wharfkit/protocol-scatter')
         }
-        return null
+
+        if (!scatterProtocol) {
+            throw new Error('Scatter protocol is not available in this environment')
+        }
+        return scatterProtocol
     }
 
     /**
@@ -57,9 +62,6 @@ export class WalletPluginWombat extends AbstractWalletPlugin implements WalletPl
      */
     async login(context: LoginContext): Promise<WalletPluginLoginResponse> {
         const scatterProtocol = await this.loadScatterProtocol()
-        if (!scatterProtocol) {
-            throw new Error('Scatter protocol is not available in this environment')
-        }
         return scatterProtocol.handleLogin(context)
     }
 
@@ -71,9 +73,6 @@ export class WalletPluginWombat extends AbstractWalletPlugin implements WalletPl
      */
     async logout(context: LogoutContext): Promise<void> {
         const scatterProtocol = await this.loadScatterProtocol()
-        if (!scatterProtocol) {
-            throw new Error('Scatter protocol is not available in this environment')
-        }
         return scatterProtocol.handleLogout(context)
     }
 
@@ -89,9 +88,6 @@ export class WalletPluginWombat extends AbstractWalletPlugin implements WalletPl
         context: TransactContext
     ): Promise<WalletPluginSignResponse> {
         const scatterProtocol = await this.loadScatterProtocol()
-        if (!scatterProtocol) {
-            throw new Error('Scatter protocol is not available in this environment')
-        }
         return scatterProtocol.handleSignatureRequest(resolved, context)
     }
 }
