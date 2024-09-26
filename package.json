@@ -16,10 +16,10 @@
         "prepare": "make"
     },
     "dependencies": {
-        "@wharfkit/protocol-scatter": "^1.3.1",
         "tslib": "^2.1.0"
     },
     "peerDependencies": {
+        "@wharfkit/protocol-scatter": "^1.3.1",
         "@wharfkit/session": "^1.4.0"
     },
     "devDependencies": {
