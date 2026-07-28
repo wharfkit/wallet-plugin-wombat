@@ -1,21 +1,13 @@
 # @wharfkit/wallet-plugin-wombat
 
-A Session Kit wallet plugin for the [Wombat](https://www.wombat.app/) wallet.
+> [!WARNING]
+> **Discontinued — do not use.**
+>
+> The Wombat wallet has been shut down and this plugin is no longer maintained. The wallet's former domain no longer belongs to the Wombat project and now redirects to unrelated third-party sites, so all links to it have been removed from this repository. Do not visit it.
+>
+> If your application still includes this plugin, remove it from your SessionKit `walletPlugins` configuration. The npm package has been deprecated and this repository is archived.
 
-## Usage
-
-Include this wallet plugin while initializing the SessionKit.
-
-**NOTE**: This wallet plugin will only work with the SessionKit and requires a browser-based environment.
-
-```ts
-import {WalletPluginWombat} from '@wharfkit/wallet-plugin-wombat'
-
-const kit = new SessionKit({
-    // ... your other options
-    walletPlugins: [new WalletPluginWombat()],
-})
-```
+A Session Kit wallet plugin for the Wombat wallet.
 
 ## Developing
 
